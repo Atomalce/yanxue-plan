@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>研学计划</title>
+<style>
+  :root{
+    --bg:#faf6ef;
+    --card:#fffdf8;
+    --ink:#2b2b2b;
+    --muted:#8a8175;
+    --accent:#1b4332;
+    --accent-2:#2d6a4f;
+    --accent-soft:#d8e2dc;
+    --border:#e7dfd0;
+    --danger:#9b2c2c;
+    --danger-soft:#f3d9d9;
+    --shadow:0 1px 3px rgba(60,50,30,.08);
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    line-height:1.6;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{
+    max-width:720px;
+    margin:0 auto;
+    padding:18px 16px 96px;
+  }
+  header{
+    margin-bottom:18px;
+  }
+  h1{
+    font-size:1.5rem;
+    margin:0 0 12px;
+    color:var(--accent);
+    letter-spacing:.5px;
+  }
+  .progress{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    box-shadow:var(--shadow);
+  }
+  .progress-bar{
+    height:10px;
+    background:var(--accent-soft);
+    border-radius:6px;
+    overflow:hidden;
+    margin-bottom:8px;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg,var(--accent-2),var(--accent));
+    border-radius:6px;
+    width:0%;
+    transition:width .3s ease;
+  }
+  .progress-text{
+    font-size:.9rem;
+    color:var(--muted);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .progress-text strong{color:var(--ink)}
+  .toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+    margin:18px 0 14px;
+  }
+  button{
+    font:inherit;
+    cursor:pointer;
+    border:1px solid var(--border);
+    background:var(--card);
+    color:var(--ink);
+    padding:9px 14px;
+    border-radius:9px;
+    transition:background .15s,border-color .15s,transform .05s;
+  }
+  button:hover{background:#f3ecdd}
+  button:active{transform:translateY(1px)}
+  button:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+  .btn-primary{
+    background:var(--accent);
+    color:#fff;
+    border-color:var(--accent);
+  }
+  .btn-primary:hover{background:var(--accent-2)}
+  .btn-danger{color:var(--danger)}
+  .btn-danger:hover{background:var(--danger-soft)}
+  .filters{
+    display:inline-flex;
+    gap:4px;
+    background:#f0e9da;
+    padding:3px;
+    border-radius:9px;
+  }
+  .filters button{
+    border:none;
+    background:transparent;
+    padding:7px 12px;
+    border-radius:7px;
+    color:var(--muted);
+  }
+  .filters button[aria-pressed="true"]{
+    background:var(--card);
+    color:var(--accent);
+    box-shadow:var(--shadow);
+  }
+  .spacer{flex:1 1 auto}
+  .list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+  .task{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:12px 14px;
+    box-shadow:var(--shadow);
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+  }
+  .task.done .task-title{color:var(--muted);text-decoration:line-through}
+  .task-check{
+    flex:0 0 auto;
+    margin-top:3px;
+    width:20px;height:20px;
+    accent-color:var(--accent);
+    cursor:pointer;
+  }
+  .task-body{flex:1 1 auto;min-width:0}
+  .task-title{
+    font-weight:600;
+    font-size:1.02rem;
+    word-break:break-word;
+  }
+  .task-meta{font-size:.85rem;color:var(--muted);margin-top:2px}
+  .task-actions{flex:0 0 auto;display:flex;gap:6px}
+  .task-actions button{padding:6px 10px;font-size:.85rem}
+  .empty{
+    text-align:center;
+    color:var(--muted);
+    padding:48px 16px;
+    background:var(--card);
+    border:1px dashed var(--border);
+    border-radius:var(--radius);
+  }
+  .empty .big{font-size:1.1rem;color:var(--ink);margin-bottom:6px}
+  dialog{
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:0;
+    max-width:460px;
+    width:calc(100% - 32px);
+    box-shadow:0 12px 40px rgba(60,50,30,.18);
+    color:var(--ink);
+    background:var(--card);
+  }
+  dialog::backdrop{background:rgba(40,30,15,.45)}
+  .dlg-form{padding:22px 22px 18px}
+  .dlg-form h2{margin:0 0 16px;color:var(--accent);font-size:1.2rem}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:.9rem;margin-bottom:6px;color:var(--muted)}
+  .field input[type=text],.field input[type=number]{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--border);
+    border-radius:9px;
+    font:inherit;
+    background:#fffdf8;
+    color:var(--ink);
+  }
+  .field input:focus-visible{outline:2px solid var(--accent-2);outline-offset:1px}
+  .field .hint{font-size:.8rem;color:var(--muted);margin-top:4px;display:flex;justify-content:space-between}
+  .check-row{display:flex;align-items:center;gap:8px}
+  .check-row input{width:20px;height:20px;accent-color:var(--accent)}
+  .dlg-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px}
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:24px;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--accent);
+    color:#fff;
+    padding:11px 18px;
+    border-radius:10px;
+    font-size:.9rem;
+    box-shadow:0 6px 20px rgba(0,0,0,.18);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s,transform .25s;
+    z-index:50;
+    max-width:90vw;
+    text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.err{background:var(--danger)}
+  @media (max-width:520px){
+    .task-actions{flex-direction:column}
+    h1{font-size:1.3rem}
+    .toolbar button{padding:8px 11px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>研学计划</h1>
+    <div class="progress" aria-live="polite">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text">
+        <span>已完成 <strong id="doneMinutes">0</strong> / <strong id="totalMinutes">0</strong> 分钟</span>
+        <span><strong id="progressPct">0%</strong></span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <button class="btn-primary" id="btnAdd" type="button">+ 添加任务</button>
+      <div class="filters" role="group" aria-label="筛选">
+        <button id="fAll" type="button" aria-pressed="true">全部</button>
+        <button id="fActive" type="button" aria-pressed="false">未完成</button>
+        <button id="fDone" type="button" aria-pressed="false">已完成</button>
+      </div>
+      <span class="spacer"></span>
+      <button id="btnSample" type="button">载入示例</button>
+      <button id="btnImport" type="button">导入</button>
+      <button id="btnExport" type="button">导出</button>
+    </div>
+
+    <ul class="list" id="list"></ul>
+    <div class="empty" id="empty" hidden>
+      <div class="big">尚无计划</div>
+      <div>点击「添加任务」开始规划你的研学行程</div>
+    </div>
+  </main>
+</div>
+
+<dialog id="dlg">
+  <form class="dlg-form" id="taskForm">
+    <h2 id="dlgTitle">添加任务</h2>
+    <div class="field">
+      <label for="fTitle">标题</label>
+      <input id="fTitle" name="title" type="text" autocomplete="off" required>
+      <div class="hint"><span>1 到 120 字</span><span id="titleCount">0 / 120</span></div>
+    </div>
+    <div class="field">
+      <label for="fMinutes">预计分钟数</label>
+      <input id="fMinutes" name="minutes" type="number" min="1" max="10080" step="1" inputmode="numeric" required>
+      <div class="hint">1 到 10080 的整数（最多一周）</div>
+    </div>
+    <div class="field">
+      <div class="check-row">
+        <input id="taskDoneInput" name="done" type="checkbox">
+        <label for="taskDoneInput" style="margin:0;color:var(--ink)">标记为已完成</label>
+      </div>
+    </div>
+    <div class="dlg-actions">
+      <button type="button" id="dlgCancel">取消</button>
+      <button type="submit" class="btn-primary" id="dlgSave">保存</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="fileInput" accept="application/json,.json" hidden>
+
+<script>
+(function(){
+  "use strict";
+
+  var STORAGE_KEY = "yanxue-plan:tasks:v1";
+  var MAX_TASKS = 1000;
+  var MIN_MINUTES = 1;
+  var MAX_MINUTES = 10080;
+  var MAX_TITLE = 120;
+
+  function charLen(s){
+    return Array.from(s).length;
+  }
+  function isSafeInt(n){
+    return typeof n === "number" && Number.isSafeInteger(n);
+  }
+
+  function isValidTask(t, ids){
+    if (typeof t !== "object" || t === null || Array.isArray(t)) {
+      return "存在非对象项";
+    }
+    var keys = Object.keys(t);
+    var allowed = { id:1, title:1, minutes:1, done:1 };
+    for (var i=0;i<keys.length;i++){
+      if (!allowed.hasOwnProperty(keys[i])) return "存在非法字段：" + keys[i];
+    }
+    if (!t.hasOwnProperty("id") || typeof t.id !== "string" || t.id.length === 0) {
+      return "存在无效 ID";
+    }
+    if (!t.hasOwnProperty("title") || typeof t.title !== "string" || charLen(t.title.trim()) < 1 || charLen(t.title.trim()) > MAX_TITLE) {
+      return "标题需为 1 至 120 字";
+    }
+    if (!t.hasOwnProperty("minutes") || !isSafeInt(t.minutes) || t.minutes < MIN_MINUTES || t.minutes > MAX_MINUTES) {
+      return "分钟数需为 1 至 10080 的安全整数";
+    }
+    if (!t.hasOwnProperty("done") || typeof t.done !== "boolean") {
+      return "完成状态需为布尔值";
+    }
+    if (ids.has(t.id)) return "存在重复 ID：" + t.id;
+    ids.add(t.id);
+    return null;
+  }
+
+  function validateTaskArray(arr){
+    if (!Array.isArray(arr)) return { ok:false, error:"根节点必须是数组" };
+    if (arr.length > MAX_TASKS) return { ok:false, error:"最多 1000 项，当前 " + arr.length + " 项" };
+    var ids = new Set();
+    for (var i=0;i<arr.length;i++){
+      var err = isValidTask(arr[i], ids);
+      if (err) return { ok:false, error:err };
+    }
+    return { ok:true };
+  }
+
+  function computeProgress(list){
+    var total = 0, done = 0;
+    for (var i=0;i<list.length;i++){
+      total += list[i].minutes;
+      if (list[i].done) done += list[i].minutes;
+    }
+    var pct = total > 0 ? done / total : 0;
+    return { total:total, done:done, pct:pct };
+  }
+
+  function genId(){
+    try {
+      if (typeof crypto !== "undefined" && crypto && typeof crypto.randomUUID === "function") {
+        return crypto.randomUUID();
+      }
+    } catch(e){}
+    return "id-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,10);
+  }
+
+  var SAMPLE_TASKS = [
+    { id:"sample-1", title:"阅读论文与整理笔记", minutes:90, done:true },
+    { id:"sample-2", title:"复现论文基线实验", minutes:180, done:false },
+    { id:"sample-3", title:"整理实验结果与图表", minutes:60, done:false },
+    { id:"sample-4", title:"撰写研究周报", minutes:30, done:true },
+    { id:"sample-5", title:"组会讨论与复盘", minutes:60, done:false }
+  ];
+
+  var tasks = [];
+  var filter = "all";
+  var editingId = null;
+
+  var $ = function(id){ return document.getElementById(id); };
+  var listEl = $("list");
+  var emptyEl = $("empty");
+  var dlg = $("dlg");
+  var dlgTitle = $("dlgTitle");
+  var fTitle = $("fTitle");
+  var fMinutes = $("fMinutes");
+  var fDone = $("taskDoneInput");
+  var titleCount = $("titleCount");
+
+  var toastTimer = null;
+  function toast(msg, isErr){
+    var el = $("toast");
+    el.textContent = msg;
+    el.classList.toggle("err", !!isErr);
+    el.classList.add("show");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.classList.remove("show"); }, 2800);
+  }
+
+  function saveTasks(){
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+      return true;
+    } catch(e){
+      toast("本地存储失败，本次更改不会被保存", true);
+      return false;
+    }
+  }
+
+  function loadTasks(){
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return [];
+      var data = JSON.parse(raw);
+      var v = validateTaskArray(data);
+      if (!v.ok) { console.warn("[研学计划] 存储数据无效，已忽略：" + v.error); return []; }
+      return data;
+    } catch(e){
+      console.warn("[研学计划] 读取存储失败：" + e.message);
+      return [];
+    }
+  }
+
+  function renderProgress(){
+    var p = computeProgress(tasks);
+    $("progressFill").style.width = (Math.round(p.pct * 1000) / 10) + "%";
+    $("doneMinutes").textContent = p.done;
+    $("totalMinutes").textContent = p.total;
+    $("progressPct").textContent = (Math.round(p.pct * 1000) / 10) + "%";
+  }
+
+  function renderList(){
+    listEl.innerHTML = "";
+    var view = tasks;
+    if (filter === "active") view = tasks.filter(function(t){ return !t.done; });
+    else if (filter === "done") view = tasks.filter(function(t){ return t.done; });
+
+    if (tasks.length === 0){
+      emptyEl.hidden = false;
+      emptyEl.querySelector(".big").textContent = "尚无计划";
+      emptyEl.querySelector("div:last-child").textContent = "点击「添加任务」开始规划你的研学行程";
+      return;
+    }
+    emptyEl.hidden = true;
+
+    if (view.length === 0){
+      var li = document.createElement("li");
+      li.className = "empty";
+      li.style.padding = "32px 16px";
+      var msg = filter === "active" ? "没有未完成的任务" : "没有已完成的任务";
+      li.textContent = msg;
+      listEl.appendChild(li);
+      return;
+    }
+
+    var frag = document.createDocumentFragment();
+    for (var i=0;i<view.length;i++){
+      frag.appendChild(buildItem(view[i]));
+    }
+    listEl.appendChild(frag);
+  }
+
+  function buildItem(t){
+    var li = document.createElement("li");
+    li.className = "task" + (t.done ? " done" : "");
+    li.dataset.id = t.id;
+
+    var cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.className = "task-check";
+    cb.checked = t.done;
+    cb.setAttribute("aria-label", "标记完成");
+    cb.addEventListener("change", function(){ toggleTask(t.id); });
+
+    var body = document.createElement("div");
+    body.className = "task-body";
+
+    var title = document.createElement("div");
+    title.className = "task-title";
+    title.textContent = t.title;
+
+    var meta = document.createElement("div");
+    meta.className = "task-meta";
+    meta.textContent = "预计 " + t.minutes + " 分钟 · " + (t.done ? "已完成" : "未完成");
+
+    body.appendChild(title);
+    body.appendChild(meta);
+
+    var actions = document.createElement("div");
+    actions.className = "task-actions";
+
+    var editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.textContent = "编辑";
+    editBtn.addEventListener("click", function(){ openDialog(t.id); });
+
+    var delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.className = "btn-danger";
+    delBtn.textContent = "删除";
+    delBtn.addEventListener("click", function(){ deleteTask(t.id); });
+
+    actions.appendChild(editBtn);
+    actions.appendChild(delBtn);
+
+    li.appendChild(cb);
+    li.appendChild(body);
+    li.appendChild(actions);
+    return li;
+  }
+
+  function render(){
+    renderProgress();
+    renderList();
+  }
+
+  function toggleTask(id){
+    for (var i=0;i<tasks.length;i++){
+      if (tasks[i].id === id){ tasks[i].done = !tasks[i].done; break; }
+    }
+    saveTasks();
+    render();
+  }
+
+  function deleteTask(id){
+    var t = null;
+    for (var i=0;i<tasks.length;i++){ if (tasks[i].id === id){ t = tasks[i]; break; } }
+    if (!t) return;
+    if (!confirm("确定删除任务「" + t.title + "」吗？")) return;
+    tasks = tasks.filter(function(x){ return x.id !== id; });
+    saveTasks();
+    render();
+  }
+
+  function openDialog(id){
+    editingId = id || null;
+    if (editingId){
+      var t = null;
+      for (var i=0;i<tasks.length;i++){ if (tasks[i].id === editingId){ t = tasks[i]; break; } }
+      if (!t){ toast("任务不存在", true); return; }
+      dlgTitle.textContent = "编辑任务";
+      fTitle.value = t.title;
+      fMinutes.value = t.minutes;
+      fDone.checked = t.done;
+    } else {
+      dlgTitle.textContent = "添加任务";
+      fTitle.value = "";
+      fMinutes.value = "";
+      fDone.checked = false;
+    }
+    updateTitleCount();
+    if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open","");
+    setTimeout(function(){ fTitle.focus(); }, 30);
+  }
+
+  function closeDialog(){
+    editingId = null;
+    if (dlg.open) dlg.close();
+  }
+
+  function updateTitleCount(){
+    var n = charLen(fTitle.value);
+    titleCount.textContent = n + " / " + MAX_TITLE;
+    titleCount.style.color = n > MAX_TITLE ? "var(--danger)" : "var(--muted)";
+  }
+
+  function onSubmit(e){
+    e.preventDefault();
+    var title = fTitle.value.trim();
+    var minutes = Number(fMinutes.value);
+    var done = fDone.checked;
+
+    if (charLen(title) < 1 || charLen(title) > MAX_TITLE){
+      toast("标题需为 1 至 120 字", true); return;
+    }
+    if (!isSafeInt(minutes) || minutes < MIN_MINUTES || minutes > MAX_MINUTES){
+      toast("分钟数需为 1 至 10080 的整数", true); return;
+    }
+
+    if (editingId){
+      var idx = -1;
+      for (var i=0;i<tasks.length;i++){ if (tasks[i].id === editingId){ idx = i; break; } }
+      if (idx < 0){ toast("任务不存在", true); closeDialog(); return; }
+      tasks[idx].title = title;
+      tasks[idx].minutes = minutes;
+      tasks[idx].done = done;
+    } else {
+      if (tasks.length >= MAX_TASKS){ toast("已达上限 " + MAX_TASKS + " 项", true); return; }
+      tasks.push({ id: genId(), title: title, minutes: minutes, done: done });
+    }
+    saveTasks();
+    render();
+    closeDialog();
+  }
+
+  function setFilter(f){
+    filter = f;
+    $("fAll").setAttribute("aria-pressed", f === "all" ? "true" : "false");
+    $("fActive").setAttribute("aria-pressed", f === "active" ? "true" : "false");
+    $("fDone").setAttribute("aria-pressed", f === "done" ? "true" : "false");
+    renderList();
+  }
+
+  function exportJSON(){
+    if (tasks.length === 0){ toast("当前没有可导出的计划", true); return; }
+    var data = JSON.stringify(tasks, null, 2);
+    var blob = new Blob([data], { type:"application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "yanxue-plan-" + dateStr() + ".json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast("已导出 " + tasks.length + " 项");
+  }
+
+  function dateStr(){
+    var d = new Date();
+    var m = String(d.getMonth()+1).padStart(2,"0");
+    var day = String(d.getDate()).padStart(2,"0");
+    return d.getFullYear() + m + day;
+  }
+
+  function importJSON(file){
+    file.text().then(function(text){
+      var data;
+      try { data = JSON.parse(text); }
+      catch(err){ toast("导入失败：文件不是有效的 JSON", true); return; }
+      var v = validateTaskArray(data);
+      if (!v.ok){ toast("导入失败：" + v.error + "（原计划已保留）", true); return; }
+      tasks = data;
+      saveTasks();
+      render();
+      toast("已导入 " + tasks.length + " 项计划");
+    }).catch(function(){
+      toast("导入失败：无法读取文件", true);
+    });
+  }
+
+  function loadSample(){
+    if (tasks.length > 0){
+      if (!confirm("当前已有计划，载入示例将覆盖现有内容，是否继续？")) return;
+    }
+    var v = validateTaskArray(SAMPLE_TASKS);
+    if (!v.ok){ toast("示例数据无效", true); return; }
+    tasks = SAMPLE_TASKS.map(function(t){ return { id:t.id, title:t.title, minutes:t.minutes, done:t.done }; });
+    saveTasks();
+    render();
+    toast("已载入示例计划");
+  }
+
+  fTitle.addEventListener("input", updateTitleCount);
+  $("taskForm").addEventListener("submit", onSubmit);
+  $("dlgCancel").addEventListener("click", closeDialog);
+  dlg.addEventListener("close", function(){ editingId = null; });
+
+  $("btnAdd").addEventListener("click", function(){ openDialog(null); });
+  $("fAll").addEventListener("click", function(){ setFilter("all"); });
+  $("fActive").addEventListener("click", function(){ setFilter("active"); });
+  $("fDone").addEventListener("click", function(){ setFilter("done"); });
+  $("btnSample").addEventListener("click", loadSample);
+  $("btnExport").addEventListener("click", exportJSON);
+  $("btnImport").addEventListener("click", function(){ $("fileInput").value = ""; $("fileInput").click(); });
+  $("fileInput").addEventListener("change", function(e){
+    var f = e.target.files && e.target.files[0];
+    if (f) importJSON(f);
+  });
+
+  tasks = loadTasks();
+  render();
+
+  globalThis.__yx = {
+    validateTaskArray: validateTaskArray,
+    isValidTask: isValidTask,
+    computeProgress: computeProgress,
+    charLen: charLen,
+    isSafeInt: isSafeInt,
+    genId: genId,
+    MAX_TASKS: MAX_TASKS,
+    MIN_MINUTES: MIN_MINUTES,
+    MAX_MINUTES: MAX_MINUTES,
+    MAX_TITLE: MAX_TITLE,
+    SAMPLE_TASKS: SAMPLE_TASKS
+  };
+})();
+</script>
+</body>
+</html>

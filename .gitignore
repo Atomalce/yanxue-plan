@@ -1,0 +1,6 @@
+.DS_Store
+*.log
+*.tmp
+sts-creds*
+publish-params*.json
+node_modules/
